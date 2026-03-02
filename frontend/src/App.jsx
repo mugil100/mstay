@@ -1,7 +1,8 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import PgListingPage from './pages/PgListingPage';
 import RoomDetailsPage from './pages/RoomDetailsPage';
+import AvailabilityUpdatesPage from './pages/AvailabilityUpdatesPage';
 
 function App() {
   return (
@@ -10,7 +11,7 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<PgListingPage />} />
           <Route path="rooms" element={<RoomDetailsPage />} />
-          <Route path="availability" element={<Navigate to="/" replace />} />
+          <Route path="availability" element={<AvailabilityUpdatesPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
