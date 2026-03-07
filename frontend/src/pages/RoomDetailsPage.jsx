@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
     Box, Typography, TextField, Button, Grid, MenuItem,
-    Paper, Dialog, DialogTitle, DialogContent, DialogActions,
+    Card, CardContent, Dialog, DialogTitle, DialogContent, DialogActions,
     FormControlLabel, Switch, Snackbar, Alert, Autocomplete
 } from '@mui/material';
 import { DataGrid, GridActionsCellItem } from '@mui/x-data-grid';
@@ -156,78 +156,82 @@ export default function RoomDetailsPage() {
 
     return (
         <Box>
-            <Typography variant="h4" gutterBottom>
-                Room Configuration (Nested Operations)
+            <Typography variant="h4" fontWeight={700} gutterBottom sx={{ mb: 4, color: 'text.primary' }}>
+                Room Configuration
             </Typography>
 
-            <Paper sx={{ p: 3, mb: 4, elevation: 3 }}>
-                <Typography variant="h6" gutterBottom color="primary">
-                    {editingId ? 'Update Room Details' : 'Add New Room'}
-                </Typography>
-                <Box component="form" onSubmit={handleSubmit}>
-                    <Grid container spacing={2}>
-                        <Grid size={{ xs: 12, sm: 6 }}>
-                            <Autocomplete
-                                options={pgOptions}
-                                getOptionLabel={(option) => option.pgName || ''}
-                                value={formData.pgId}
-                                onChange={(e, newValue) => setFormData({ ...formData, pgId: newValue })}
-                                isOptionEqualToValue={(option, value) => option._id === value?._id}
-                                renderInput={(params) => <TextField {...params} label="Select Parent PG Listing" required />}
-                            />
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 6 }}>
-                            <TextField
-                                required fullWidth select label="Room Type" name="roomType"
-                                value={formData.roomType} onChange={handleChange}
-                            >
-                                <MenuItem value="Single">Single</MenuItem>
-                                <MenuItem value="Double">Double</MenuItem>
-                                <MenuItem value="Triple">Triple</MenuItem>
-                                <MenuItem value="Dormitory">Dormitory</MenuItem>
-                            </TextField>
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 4 }}>
-                            <TextField
-                                required fullWidth label="Sharing Capacity" name="sharingCapacity"
-                                type="number" value={formData.sharingCapacity} onChange={handleChange}
-                            />
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 4 }}>
-                            <TextField
-                                required fullWidth label="Total Beds" name="totalBeds"
-                                type="number" value={formData.totalBeds} onChange={handleChange}
-                            />
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 4 }}>
-                            <TextField
-                                required fullWidth label="Room Rent" name="roomRent"
-                                type="number" value={formData.roomRent} onChange={handleChange}
-                            />
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 4 }}>
-                            <FormControlLabel
-                                control={
-                                    <Switch checked={formData.acAvailable} onChange={handleChange} name="acAvailable" />
-                                }
-                                label="AC Available"
-                            />
-                        </Grid>
-                        <Grid size={{ xs: 12 }} display="flex" gap={2}>
-                            <Button type="submit" variant="contained" color={editingId ? "warning" : "primary"}>
-                                {editingId ? 'Update Room' : 'Insert Room'}
-                            </Button>
-                            {editingId && (
-                                <Button variant="outlined" onClick={resetForm}>Cancel</Button>
-                            )}
-                        </Grid>
-                    </Grid>
+            <Card sx={{ mb: 4, overflow: 'visible' }}>
+                <Box sx={{ p: 2, bgcolor: 'primary.main', color: 'white', borderTopLeftRadius: 12, borderTopRightRadius: 12 }}>
+                    <Typography variant="h6">
+                        {editingId ? 'Update Room Details' : 'Add New Room'}
+                    </Typography>
                 </Box>
-            </Paper>
+                <CardContent sx={{ pt: 3 }}>
+                    <Box component="form" onSubmit={handleSubmit}>
+                        <Grid container spacing={2}>
+                            <Grid size={{ xs: 12, sm: 6 }}>
+                                <Autocomplete
+                                    options={pgOptions}
+                                    getOptionLabel={(option) => option.pgName || ''}
+                                    value={formData.pgId}
+                                    onChange={(e, newValue) => setFormData({ ...formData, pgId: newValue })}
+                                    isOptionEqualToValue={(option, value) => option._id === value?._id}
+                                    renderInput={(params) => <TextField {...params} label="Select Parent PG Listing" required />}
+                                />
+                            </Grid>
+                            <Grid size={{ xs: 12, sm: 6 }}>
+                                <TextField
+                                    required fullWidth select label="Room Type" name="roomType"
+                                    value={formData.roomType} onChange={handleChange}
+                                >
+                                    <MenuItem value="Single">Single</MenuItem>
+                                    <MenuItem value="Double">Double</MenuItem>
+                                    <MenuItem value="Triple">Triple</MenuItem>
+                                    <MenuItem value="Dormitory">Dormitory</MenuItem>
+                                </TextField>
+                            </Grid>
+                            <Grid size={{ xs: 12, sm: 4 }}>
+                                <TextField
+                                    required fullWidth label="Sharing Capacity" name="sharingCapacity"
+                                    type="number" value={formData.sharingCapacity} onChange={handleChange}
+                                />
+                            </Grid>
+                            <Grid size={{ xs: 12, sm: 4 }}>
+                                <TextField
+                                    required fullWidth label="Total Beds" name="totalBeds"
+                                    type="number" value={formData.totalBeds} onChange={handleChange}
+                                />
+                            </Grid>
+                            <Grid size={{ xs: 12, sm: 4 }}>
+                                <TextField
+                                    required fullWidth label="Room Rent" name="roomRent"
+                                    type="number" value={formData.roomRent} onChange={handleChange}
+                                />
+                            </Grid>
+                            <Grid size={{ xs: 12, sm: 4 }}>
+                                <FormControlLabel
+                                    control={
+                                        <Switch checked={formData.acAvailable} onChange={handleChange} name="acAvailable" />
+                                    }
+                                    label="AC Available"
+                                />
+                            </Grid>
+                            <Grid size={{ xs: 12 }} display="flex" gap={2}>
+                                <Button type="submit" variant="contained" color={editingId ? "warning" : "primary"}>
+                                    {editingId ? 'Update Room' : 'Insert Room'}
+                                </Button>
+                                {editingId && (
+                                    <Button variant="outlined" onClick={resetForm}>Cancel</Button>
+                                )}
+                            </Grid>
+                        </Grid>
+                    </Box>
+                </CardContent>
+            </Card>
 
-            <Paper sx={{ p: 3, elevation: 3 }}>
-                <Box display="flex" justifyContent="space-between" mb={2}>
-                    <Typography variant="h6" color="primary">All Rooms</Typography>
+            <Card>
+                <Box display="flex" justifyContent="space-between" alignItems="center" p={2} borderBottom="1px solid #f1f5f9">
+                    <Typography variant="h6" fontWeight={600}>All Rooms</Typography>
                     <Box display="flex" gap={1}>
                         <TextField
                             size="small" label="Search by ID, Room Type, or Details"
@@ -237,16 +241,18 @@ export default function RoomDetailsPage() {
                         <Button variant="text" onClick={() => { setSearchText(''); fetchData(); }}>Clear</Button>
                     </Box>
                 </Box>
-                <Box sx={{ height: 400, width: '100%' }}>
-                    <DataGrid
-                        rows={rooms}
-                        columns={columns}
-                        pageSizeOptions={[5, 10, 20]}
-                        initialState={{ pagination: { paginationModel: { pageSize: 5 } } }}
-                        disableRowSelectionOnClick
-                    />
-                </Box>
-            </Paper>
+                <CardContent sx={{ p: 0 }}>
+                    <Box sx={{ height: 400, width: '100%', '& .MuiDataGrid-root': { border: 'none' }, '& .MuiDataGrid-columnHeaders': { backgroundColor: '#f8fafc' } }}>
+                        <DataGrid
+                            rows={rooms}
+                            columns={columns}
+                            pageSizeOptions={[5, 10, 20]}
+                            initialState={{ pagination: { paginationModel: { pageSize: 5 } } }}
+                            disableRowSelectionOnClick
+                        />
+                    </Box>
+                </CardContent>
+            </Card>
 
             {/* Confirmation Dialogs */}
             <Dialog open={confirmDialog.open} onClose={() => setConfirmDialog({ open: false, id: null })}>

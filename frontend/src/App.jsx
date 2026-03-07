@@ -3,6 +3,7 @@ import Layout from './components/Layout';
 import PgListingPage from './pages/PgListingPage';
 import RoomDetailsPage from './pages/RoomDetailsPage';
 import AvailabilityUpdatesPage from './pages/AvailabilityUpdatesPage';
+import VisualizationsPage from './pages/VisualizationsPage';
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
           <Route index element={<PgListingPage />} />
           <Route path="rooms" element={<RoomDetailsPage />} />
           <Route path="availability" element={<AvailabilityUpdatesPage />} />
+          <Route path="visualizations" element={<VisualizationsPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

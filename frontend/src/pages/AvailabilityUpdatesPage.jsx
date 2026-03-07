@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Box, Typography, Paper, TextField, Button, Grid, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, Snackbar, Alert
+    Box, Typography, Card, CardContent, TextField, Button, Grid, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, Snackbar, Alert
 } from '@mui/material';
 import { DataGrid, GridActionsCellItem } from '@mui/x-data-grid';
 import EditIcon from '@mui/icons-material/Edit';
@@ -123,18 +123,18 @@ export default function AvailabilityUpdatesPage() {
 
     return (
         <Box>
-            <Box display="flex" justifyContent="space-between" mb={3}>
-                <Typography variant="h4">
+            <Box display="flex" justifyContent="space-between" mb={4} alignItems="center">
+                <Typography variant="h4" fontWeight={700} color="text.primary">
                     Availability Updates
                 </Typography>
-                <Button variant="contained" color="primary" onClick={handleNew}>
+                <Button variant="contained" color="primary" onClick={handleNew} sx={{ borderRadius: 2 }}>
                     Update Availability
                 </Button>
             </Box>
 
-            <Paper sx={{ p: 3, elevation: 3 }}>
-                <Box display="flex" justifyContent="space-between" mb={2}>
-                    <Typography variant="h6" color="primary">Current Room Availabilities</Typography>
+            <Card>
+                <Box display="flex" justifyContent="space-between" alignItems="center" p={2} borderBottom="1px solid #f1f5f9">
+                    <Typography variant="h6" fontWeight={600}>Current Room Availabilities</Typography>
                     <TextField
                         size="small"
                         label="Search Name, Room or Status"
@@ -142,18 +142,20 @@ export default function AvailabilityUpdatesPage() {
                         onChange={(e) => setSearchText(e.target.value)}
                     />
                 </Box>
-                <Box sx={{ height: 400, width: '100%' }}>
-                    <DataGrid
-                        rows={filteredRows}
-                        columns={columns}
-                        pageSizeOptions={[5, 10, 20]}
-                        initialState={{
-                            pagination: { paginationModel: { pageSize: 5 } },
-                        }}
-                        disableRowSelectionOnClick
-                    />
-                </Box>
-            </Paper>
+                <CardContent sx={{ p: 0 }}>
+                    <Box sx={{ height: 400, width: '100%', '& .MuiDataGrid-root': { border: 'none' }, '& .MuiDataGrid-columnHeaders': { backgroundColor: '#f8fafc' } }}>
+                        <DataGrid
+                            rows={filteredRows}
+                            columns={columns}
+                            pageSizeOptions={[5, 10, 20]}
+                            initialState={{
+                                pagination: { paginationModel: { pageSize: 5 } },
+                            }}
+                            disableRowSelectionOnClick
+                        />
+                    </Box>
+                </CardContent>
+            </Card>
 
             {/* Insert/Update Dialog */}
             <Dialog open={actionDialog} onClose={() => setActionDialog(false)} maxWidth="sm" fullWidth>

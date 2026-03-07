@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
     Box, Typography, TextField, Button, Grid, MenuItem,
-    Paper, IconButton, Dialog, DialogTitle, DialogContent, DialogActions,
-    FormControlLabel, Switch, Snackbar, Alert
+    Card, CardContent, IconButton, Dialog, DialogTitle, DialogContent, DialogActions,
+    FormControlLabel, Switch, Snackbar, Alert, Divider
 } from '@mui/material';
 import { DataGrid, GridActionsCellItem } from '@mui/x-data-grid';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -154,83 +154,87 @@ export default function PgListingPage() {
 
     return (
         <Box>
-            <Typography variant="h4" gutterBottom>
+            <Typography variant="h4" fontWeight={700} gutterBottom sx={{ mb: 4, color: 'text.primary' }}>
                 PG / Hostel Listing Management
             </Typography>
 
-            <Paper sx={{ p: 3, mb: 4, elevation: 3 }}>
-                <Typography variant="h6" gutterBottom color="primary">
-                    {editingId ? 'Update PG Listing' : 'Add New PG Listing'}
-                </Typography>
-                <Box component="form" onSubmit={handleSubmit}>
-                    <Grid container spacing={2}>
-                        <Grid size={{ xs: 12, sm: 6 }}>
-                            <TextField
-                                required fullWidth label="PG Name" name="pgName"
-                                value={formData.pgName} onChange={handleChange}
-                            />
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 6 }}>
-                            <TextField
-                                required fullWidth label="Location" name="location"
-                                value={formData.location} onChange={handleChange}
-                            />
-                        </Grid>
-                        <Grid size={{ xs: 12 }}>
-                            <TextField
-                                required fullWidth label="Address" name="address"
-                                multiline rows={2} value={formData.address} onChange={handleChange}
-                            />
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 4 }}>
-                            <TextField
-                                required fullWidth label="Monthly Rent" name="rent"
-                                type="number" value={formData.rent} onChange={handleChange}
-                            />
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 4 }}>
-                            <TextField
-                                required fullWidth select label="Gender Preference" name="genderPreference"
-                                value={formData.genderPreference} onChange={handleChange}
-                            >
-                                <MenuItem value="Boys">Boys</MenuItem>
-                                <MenuItem value="Girls">Girls</MenuItem>
-                                <MenuItem value="Co-ed">Co-ed</MenuItem>
-                            </TextField>
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 4 }} display="flex" alignItems="center">
-                            <FormControlLabel
-                                control={
-                                    <Switch
-                                        checked={formData.isActive}
-                                        onChange={handleChange}
-                                        name="isActive"
-                                    />
-                                }
-                                label="Active Status"
-                            />
-                        </Grid>
-                        <Grid size={{ xs: 12 }}>
-                            <TextField
-                                fullWidth label="Description" name="description"
-                                multiline rows={2} value={formData.description} onChange={handleChange}
-                            />
-                        </Grid>
-                        <Grid size={{ xs: 12 }} display="flex" gap={2}>
-                            <Button type="submit" variant="contained" color={editingId ? "warning" : "primary"}>
-                                {editingId ? 'Update Listing' : 'Insert Listing'}
-                            </Button>
-                            {editingId && (
-                                <Button variant="outlined" onClick={resetForm}>Cancel</Button>
-                            )}
-                        </Grid>
-                    </Grid>
+            <Card sx={{ mb: 4, overflow: 'visible' }}>
+                <Box sx={{ p: 2, bgcolor: 'primary.main', color: 'white', borderTopLeftRadius: 12, borderTopRightRadius: 12 }}>
+                    <Typography variant="h6">
+                        {editingId ? 'Update PG Listing' : 'Add New PG Listing'}
+                    </Typography>
                 </Box>
-            </Paper>
+                <CardContent sx={{ pt: 3 }}>
+                    <Box component="form" onSubmit={handleSubmit}>
+                        <Grid container spacing={2}>
+                            <Grid size={{ xs: 12, sm: 6 }}>
+                                <TextField
+                                    required fullWidth label="PG Name" name="pgName"
+                                    value={formData.pgName} onChange={handleChange}
+                                />
+                            </Grid>
+                            <Grid size={{ xs: 12, sm: 6 }}>
+                                <TextField
+                                    required fullWidth label="Location" name="location"
+                                    value={formData.location} onChange={handleChange}
+                                />
+                            </Grid>
+                            <Grid size={{ xs: 12 }}>
+                                <TextField
+                                    required fullWidth label="Address" name="address"
+                                    multiline rows={2} value={formData.address} onChange={handleChange}
+                                />
+                            </Grid>
+                            <Grid size={{ xs: 12, sm: 4 }}>
+                                <TextField
+                                    required fullWidth label="Monthly Rent" name="rent"
+                                    type="number" value={formData.rent} onChange={handleChange}
+                                />
+                            </Grid>
+                            <Grid size={{ xs: 12, sm: 4 }}>
+                                <TextField
+                                    required fullWidth select label="Gender Preference" name="genderPreference"
+                                    value={formData.genderPreference} onChange={handleChange}
+                                >
+                                    <MenuItem value="Boys">Boys</MenuItem>
+                                    <MenuItem value="Girls">Girls</MenuItem>
+                                    <MenuItem value="Co-ed">Co-ed</MenuItem>
+                                </TextField>
+                            </Grid>
+                            <Grid size={{ xs: 12, sm: 4 }} display="flex" alignItems="center">
+                                <FormControlLabel
+                                    control={
+                                        <Switch
+                                            checked={formData.isActive}
+                                            onChange={handleChange}
+                                            name="isActive"
+                                        />
+                                    }
+                                    label="Active Status"
+                                />
+                            </Grid>
+                            <Grid size={{ xs: 12 }}>
+                                <TextField
+                                    fullWidth label="Description" name="description"
+                                    multiline rows={2} value={formData.description} onChange={handleChange}
+                                />
+                            </Grid>
+                            <Grid size={{ xs: 12 }} display="flex" gap={2}>
+                                <Button type="submit" variant="contained" color={editingId ? "warning" : "primary"}>
+                                    {editingId ? 'Update Listing' : 'Insert Listing'}
+                                </Button>
+                                {editingId && (
+                                    <Button variant="outlined" onClick={resetForm}>Cancel</Button>
+                                )}
+                            </Grid>
+                        </Grid>
+                    </Box>
+                </CardContent>
+            </Card>
 
-            <Paper sx={{ p: 3, elevation: 3 }}>
-                <Box display="flex" justifyContent="space-between" mb={2}>
-                    <Typography variant="h6" color="primary">All PG Listings</Typography>
+            <Card>
+                <Box display="flex" justifyContent="space-between" alignItems="center" p={2} borderBottom="1px solid #f1f5f9">
+                    <Typography variant="h6" fontWeight={600}>All PG Listings</Typography>
                     <Box display="flex" gap={1}>
                         <TextField
                             size="small" label="Search by Name, Location, or ID"
@@ -240,18 +244,20 @@ export default function PgListingPage() {
                         <Button variant="text" onClick={() => { setSearchText(''); fetchListings(); }}>Clear</Button>
                     </Box>
                 </Box>
-                <Box sx={{ height: 400, width: '100%' }}>
-                    <DataGrid
-                        rows={listings}
-                        columns={columns}
-                        pageSizeOptions={[5, 10, 20]}
-                        initialState={{
-                            pagination: { paginationModel: { pageSize: 5 } },
-                        }}
-                        disableRowSelectionOnClick
-                    />
-                </Box>
-            </Paper>
+                <CardContent sx={{ p: 0 }}>
+                    <Box sx={{ height: 400, width: '100%', '& .MuiDataGrid-root': { border: 'none' }, '& .MuiDataGrid-columnHeaders': { backgroundColor: '#f8fafc' } }}>
+                        <DataGrid
+                            rows={listings}
+                            columns={columns}
+                            pageSizeOptions={[5, 10, 20]}
+                            initialState={{
+                                pagination: { paginationModel: { pageSize: 5 } },
+                            }}
+                            disableRowSelectionOnClick
+                        />
+                    </Box>
+                </CardContent>
+            </Card>
 
             {/* Delete Confirmation Dialog */}
             <Dialog open={confirmDialog.open} onClose={() => setConfirmDialog({ open: false, id: null })}>

@@ -3,6 +3,7 @@ import { Box, Drawer, List, ListItem, ListItemIcon, ListItemText, Typography, Ap
 import HomeIcon from '@mui/icons-material/Home';
 import BedroomParentIcon from '@mui/icons-material/BedroomParent';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import PieChartIcon from '@mui/icons-material/PieChart';
 
 const drawerWidth = 240;
 
@@ -10,6 +11,7 @@ const menuItems = [
     { text: 'PG Listings', icon: <HomeIcon />, path: '/' },
     { text: 'Room Details', icon: <BedroomParentIcon />, path: '/rooms' },
     { text: 'Availability Updates', icon: <EventAvailableIcon />, path: '/availability' },
+    { text: 'Visualizations', icon: <PieChartIcon />, path: '/visualizations' },
 ];
 
 export default function Layout() {
@@ -19,10 +21,10 @@ export default function Layout() {
     return (
         <Box sx={{ display: 'flex' }}>
             <CssBaseline />
-            <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, backgroundColor: '#2c3e50' }}>
+            <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
                 <Toolbar>
-                    <Typography variant="h6" noWrap component="div">
-                        Smart Housing Solution for Students
+                    <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 800, color: 'primary.main', letterSpacing: 1 }}>
+                        MOV Stay
                     </Typography>
                 </Toolbar>
             </AppBar>
@@ -44,14 +46,20 @@ export default function Layout() {
                                 onClick={() => navigate(item.path)}
                                 selected={location.pathname === item.path}
                                 sx={{
-                                    backgroundColor: location.pathname === item.path ? '#e0f7fa' : 'inherit',
-                                    '&:hover': { backgroundColor: '#b2ebf2' }
+                                    mx: 1,
+                                    mb: 0.5,
+                                    borderRadius: 2,
+                                    backgroundColor: location.pathname === item.path ? 'primary.light' : 'transparent',
+                                    color: location.pathname === item.path ? '#fff' : 'inherit',
+                                    '&:hover': {
+                                        backgroundColor: location.pathname === item.path ? 'primary.main' : 'action.hover',
+                                    }
                                 }}
                             >
-                                <ListItemIcon sx={{ color: location.pathname === item.path ? '#00796b' : 'inherit' }}>
+                                <ListItemIcon sx={{ color: location.pathname === item.path ? '#fff' : 'inherit' }}>
                                     {item.icon}
                                 </ListItemIcon>
-                                <ListItemText primary={item.text} />
+                                <ListItemText primary={item.text} primaryTypographyProps={{ fontWeight: location.pathname === item.path ? 600 : 400 }} />
                             </ListItem>
                         ))}
                     </List>

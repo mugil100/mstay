@@ -5,3 +5,6 @@ const api = axios.create({
 });
 
 export default api;
+
+
+// git status updated for master regarding the changes
