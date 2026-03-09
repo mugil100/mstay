@@ -4,11 +4,17 @@ import HomeIcon from '@mui/icons-material/Home';
 import BedroomParentIcon from '@mui/icons-material/BedroomParent';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import PieChartIcon from '@mui/icons-material/PieChart';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import AddBoxIcon from '@mui/icons-material/AddBox';
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 
 const drawerWidth = 240;
 
 const menuItems = [
     { text: 'PG Listings', icon: <HomeIcon />, path: '/' },
+    { text: 'Owner Dashboard', icon: <DashboardIcon />, path: '/owner/dashboard' },
+    { text: 'Add PG', icon: <AddBoxIcon />, path: '/owner/add-pg' },
+    { text: 'Manage PGs', icon: <ManageAccountsIcon />, path: '/owner/manage-pgs' },
     { text: 'Room Details', icon: <BedroomParentIcon />, path: '/rooms' },
     { text: 'Availability Updates', icon: <EventAvailableIcon />, path: '/availability' },
     { text: 'Visualizations', icon: <PieChartIcon />, path: '/visualizations' },
