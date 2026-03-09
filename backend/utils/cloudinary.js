@@ -14,7 +14,7 @@ const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
         folder: 'mov_stay_pg_images', // The folder name in your Cloudinary account
-        allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+        allowedFormats: ['jpg', 'jpeg', 'png', 'webp'],
         transformation: [{ width: 1000, height: 1000, crop: 'limit' }] // Optimize image size
     }
 });

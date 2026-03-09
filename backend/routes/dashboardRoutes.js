@@ -3,6 +3,7 @@ const router = express.Router();
 const PgListing = require('../models/PgListing');
 const PgRoom = require('../models/PgRoom');
 const PgAvailability = require('../models/PgAvailability');
+const VisitBooking = require('../models/VisitBooking');
 
 // Get owner dashboard statistics
 router.get('/owner-stats', async (req, res) => {
@@ -25,11 +26,12 @@ router.get('/owner-stats', async (req, res) => {
         // Occupancy = ((Total Capacity - Available Beds) / Total Capacity) * 100
         let occupancyRate = 0;
         if (totalBedCapacity > 0) {
-            occupancyRate = (((totalBedCapacity - availableBeds) / totalBedCapacity) * 100).toFixed(1);
+            occupancyRate = Number((((totalBedCapacity - availableBeds) / totalBedCapacity) * 100).toFixed(1));
+            if (isNaN(occupancyRate) || occupancyRate < 0) occupancyRate = 0;
         }
 
-        // 5. Visit Requests (Mocked since there is no VisitRequest schema)
-        const visitRequests = 6; // Mock value as requested in the plan
+        // 5. Visit Requests (Actual count from DB)
+        const visitRequests = await VisitBooking.countDocuments();
 
         // 6. Recent Listings (Top 5 created recently)
         const recentListings = await PgListing.find().sort({ createdAt: -1 }).limit(5);

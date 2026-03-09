@@ -23,9 +23,19 @@ app.use('/api/availability', availabilityRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/upload', uploadRoutes);
 
+// Global Error Handler
+app.use((err, req, res, next) => {
+    console.error('Unhandled Server Error:', err);
+    res.status(500).json({
+        success: false,
+        message: err.message || 'Internal Server Error',
+        error: err
+    });
+});
+
 // Database connection
 mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log(`✅ MongoDB Connected to database: ${mongoose.connection.name}`))
+    .then(() => console.log(`✅ MongoDB Connected to database: ${mongoose.connection.name} (Cloudinary Ready)`))
     .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
 // Start server

@@ -46,6 +46,7 @@ const EditPgPage = () => {
         studyRoom: false
     });
 
+    const [selectedFiles, setSelectedFiles] = useState([]);
     const [loadingSubmit, setLoadingSubmit] = useState(false);
     const [error, setError] = useState('');
 
@@ -62,7 +63,8 @@ const EditPgPage = () => {
                     rent: data.rent || '',
                     genderPreference: data.genderPreference || '',
                     description: data.description || '',
-                    images: data.images ? data.images.join(', ') : '',
+                    // We keep existing images in state to merge later
+                    existingImages: data.images || [],
                     isActive: data.isActive !== undefined ? data.isActive : true
                 });
 
@@ -104,24 +106,47 @@ const EditPgPage = () => {
         });
     };
 
+    const handleFileChange = (e) => {
+        setSelectedFiles(Array.from(e.target.files));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoadingSubmit(true);
         setError('');
 
-        const submitData = {
-            ...formData,
-            rent: Number(formData.rent),
-            amenities: amenities,
-            images: formData.images ? formData.images.split(',').map(img => img.trim()).filter(img => img !== "") : []
-        };
-
         try {
+            let uploadedImageUrls = [];
+
+            // 1. Upload New Images to Cloudinary via Backend
+            if (selectedFiles.length > 0) {
+                const imageFormData = new FormData();
+                selectedFiles.forEach(file => {
+                    imageFormData.append('images', file);
+                });
+
+                const uploadResponse = await api.post('/upload', imageFormData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+
+                uploadedImageUrls = uploadResponse.data.imageUrls;
+            }
+
+            // Merge existing URLs with newly uploaded URLs
+            const finalImages = [...(formData.existingImages || []), ...uploadedImageUrls];
+
+            const submitData = {
+                ...formData,
+                rent: Number(formData.rent),
+                amenities: amenities,
+                images: finalImages
+            };
+
             await api.put(`/pg/${id}`, submitData);
             navigate('/owner/manage-pgs');
         } catch (err) {
             console.error("Failed to update PG", err);
-            setError('Failed to update PG listing. Please try again.');
+            setError(err.response?.data?.message || 'Failed to update PG listing. Please try again.');
         } finally {
             setLoadingSubmit(false);
         }
@@ -241,14 +266,25 @@ const EditPgPage = () => {
                         </Grid>
 
                         <Grid item xs={12}>
-                            <TextField
+                            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                                Upload Additional Images (Will be added to existing ones)
+                            </Typography>
+                            <Button
+                                variant="outlined"
+                                component="label"
                                 fullWidth
-                                label="Image URLs (comma separated)"
-                                name="images"
-                                value={formData.images}
-                                onChange={handleChange}
-                                helperText="Enter multiple URLs separated by commas"
-                            />
+                                sx={{ justifyContent: 'flex-start', textTransform: 'none' }}
+                            >
+                                {selectedFiles.length > 0 ? `${selectedFiles.length} files selected` : "Choose Files..."}
+                                <input
+                                    type="file"
+                                    name="images"
+                                    multiple
+                                    accept="image/*"
+                                    hidden
+                                    onChange={handleFileChange}
+                                />
+                            </Button>
                         </Grid>
 
                         <Grid item xs={12}>

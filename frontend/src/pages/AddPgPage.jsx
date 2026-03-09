@@ -42,6 +42,7 @@ const AddPgPage = () => {
         studyRoom: false
     });
 
+    const [selectedFiles, setSelectedFiles] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -60,26 +61,46 @@ const AddPgPage = () => {
         });
     };
 
+    const handleFileChange = (e) => {
+        setSelectedFiles(Array.from(e.target.files));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError('');
 
-        // Prepare data to match backend schema exactly
-        const submitData = {
-            ...formData,
-            rent: Number(formData.rent),
-            amenities: amenities,
-            // Convert comma separated string to array, trimming whitespace
-            images: formData.images ? formData.images.split(',').map(img => img.trim()).filter(img => img !== "") : []
-        };
-
         try {
+            let uploadedImageUrls = [];
+
+            // 1. Upload Images to Cloudinary via Backend
+            if (selectedFiles.length > 0) {
+                const imageFormData = new FormData();
+                selectedFiles.forEach(file => {
+                    imageFormData.append('images', file);
+                });
+
+                const uploadResponse = await api.post('/upload', imageFormData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+
+                uploadedImageUrls = uploadResponse.data.imageUrls;
+            }
+
+            // 2. Prepare PG Data
+            const submitData = {
+                ...formData,
+                rent: Number(formData.rent),
+                amenities: amenities,
+                images: uploadedImageUrls
+            };
+
+            // 3. Save PG Listing
             await api.post('/pg', submitData);
             navigate('/owner/manage-pgs');
         } catch (err) {
             console.error("Failed to add PG", err);
-            setError('Failed to add PG listing. Please try again.');
+            setError(err.response?.data?.message || 'Failed to add PG listing. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -191,14 +212,25 @@ const AddPgPage = () => {
                         </Grid>
 
                         <Grid item xs={12}>
-                            <TextField
+                            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                                Upload Property Images (Multiple allowed)
+                            </Typography>
+                            <Button
+                                variant="outlined"
+                                component="label"
                                 fullWidth
-                                label="Image URLs (comma separated)"
-                                name="images"
-                                value={formData.images}
-                                onChange={handleChange}
-                                helperText="Enter multiple URLs separated by commas"
-                            />
+                                sx={{ justifyContent: 'flex-start', textTransform: 'none' }}
+                            >
+                                {selectedFiles.length > 0 ? `${selectedFiles.length} files selected` : "Choose Files..."}
+                                <input
+                                    type="file"
+                                    name="images"
+                                    multiple
+                                    accept="image/*"
+                                    hidden
+                                    onChange={handleFileChange}
+                                />
+                            </Button>
                         </Grid>
 
                         <Grid item xs={12}>

@@ -127,10 +127,10 @@ const OwnerDashboard = () => {
                         {stats.recentActivity.length > 0 ? (
                             <List>
                                 {stats.recentActivity.map((activity, index) => (
-                                    <React.Fragment key={index}>
+                                    <React.Fragment key={activity.id || index}>
                                         <ListItem alignItems="flex-start" sx={{ px: 0 }}>
                                             <ListItemText
-                                                primary={activity.description}
+                                                primary={String(activity.description)}
                                                 secondary={new Date(activity.date).toLocaleDateString()}
                                                 primaryTypographyProps={{ variant: 'body1', fontWeight: 500 }}
                                             />

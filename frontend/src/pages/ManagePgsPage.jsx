@@ -84,7 +84,11 @@ const ManagePgsPage = () => {
             field: 'rent',
             headerName: 'Base Rent',
             width: 120,
-            valueFormatter: (params) => params.value ? `₹${params.value}` : 'N/A'
+            renderCell: (params) => (
+                <Typography sx={{ mt: 1.5 }}>
+                    {params.row.rent ? `₹${params.row.rent}` : 'N/A'}
+                </Typography>
+            )
         },
         { field: 'genderPreference', headerName: 'Gender', width: 120 },
         {
