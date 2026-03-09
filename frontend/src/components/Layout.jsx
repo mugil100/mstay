@@ -11,8 +11,7 @@ import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 const drawerWidth = 240;
 
 const menuItems = [
-    { text: 'PG Listings', icon: <HomeIcon />, path: '/' },
-    { text: 'Owner Dashboard', icon: <DashboardIcon />, path: '/owner/dashboard' },
+    { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
     { text: 'Add PG', icon: <AddBoxIcon />, path: '/owner/add-pg' },
     { text: 'Manage PGs', icon: <ManageAccountsIcon />, path: '/owner/manage-pgs' },
     { text: 'Room Details', icon: <BedroomParentIcon />, path: '/rooms' },

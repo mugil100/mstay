@@ -1,12 +1,18 @@
 const mongoose = require('mongoose');
 
-const pgRoomSchema = new mongoose.Schema({
-    pgId: { type: mongoose.Schema.Types.ObjectId, ref: 'PgListing', required: true },
-    roomType: { type: String, required: true, enum: ['Single', 'Double', 'Triple', 'Dormitory'] },
-    sharingCapacity: { type: Number, required: true },
-    roomRent: { type: Number, required: true },
-    acAvailable: { type: Boolean, default: false },
-    totalBeds: { type: Number, required: true }
-}, { timestamps: true });
+const PgRoomSchema = new mongoose.Schema({
+    pgId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "PgListing"
+    },
+    roomType: {
+        type: String,
+        enum: ["Single", "Double", "Triple", "Dormitory"]
+    },
+    sharingCapacity: Number,
+    totalBeds: Number,
+    roomRent: Number,
+    acAvailable: Boolean
+});
 
-module.exports = mongoose.model('PgRoom', pgRoomSchema);
+module.exports = mongoose.model('PgRoom', PgRoomSchema);

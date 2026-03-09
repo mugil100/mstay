@@ -14,11 +14,10 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Layout />}>
-          <Route index element={<PgListingPage />} />
+          <Route index element={<OwnerDashboard />} />
           <Route path="rooms" element={<RoomDetailsPage />} />
           <Route path="availability" element={<AvailabilityUpdatesPage />} />
           <Route path="visualizations" element={<VisualizationsPage />} />
-          <Route path="owner/dashboard" element={<OwnerDashboard />} />
           <Route path="owner/add-pg" element={<AddPgPage />} />
           <Route path="owner/manage-pgs" element={<ManagePgsPage />} />
           <Route path="owner/edit-pg/:id" element={<EditPgPage />} />
