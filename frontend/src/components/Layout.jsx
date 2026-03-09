@@ -1,5 +1,5 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { Box, Drawer, List, ListItem, ListItemIcon, ListItemText, Typography, AppBar, Toolbar, CssBaseline } from '@mui/material';
+import { Box, Drawer, List, ListItem, ListItemIcon, ListItemText, Typography, AppBar, Toolbar, CssBaseline, Divider } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import BedroomParentIcon from '@mui/icons-material/BedroomParent';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
@@ -7,6 +7,9 @@ import PieChartIcon from '@mui/icons-material/PieChart';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
+import LogoutIcon from '@mui/icons-material/Logout';
+import { useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
 
 const drawerWidth = 240;
 
@@ -22,6 +25,12 @@ const menuItems = [
 export default function Layout() {
     const navigate = useNavigate();
     const location = useLocation();
+    const { logout } = useContext(AuthContext);
+
+    const handleLogout = () => {
+        logout();
+        navigate('/login');
+    };
 
     return (
         <Box sx={{ display: 'flex' }}>
@@ -42,8 +51,8 @@ export default function Layout() {
                 }}
             >
                 <Toolbar />
-                <Box sx={{ overflow: 'auto' }}>
-                    <List>
+                <Box sx={{ overflow: 'auto', display: 'flex', flexDirection: 'column', height: '100%' }}>
+                    <List sx={{ flexGrow: 1 }}>
                         {menuItems.map((item) => (
                             <ListItem
                                 button
@@ -67,6 +76,29 @@ export default function Layout() {
                                 <ListItemText primary={item.text} primaryTypographyProps={{ fontWeight: location.pathname === item.path ? 600 : 400 }} />
                             </ListItem>
                         ))}
+                    </List>
+                    <Divider />
+                    <List>
+                        <ListItem
+                            button
+                            onClick={handleLogout}
+                            sx={{
+                                mx: 1,
+                                mb: 1,
+                                borderRadius: 2,
+                                color: 'error.main',
+                                '&:hover': {
+                                    backgroundColor: 'error.light',
+                                    color: '#fff',
+                                    '& .MuiListItemIcon-root': { color: '#fff' }
+                                }
+                            }}
+                        >
+                            <ListItemIcon sx={{ color: 'error.main' }}>
+                                <LogoutIcon />
+                            </ListItemIcon>
+                            <ListItemText primary="Logout" primaryTypographyProps={{ fontWeight: 500 }} />
+                        </ListItem>
                     </List>
                 </Box>
             </Drawer>

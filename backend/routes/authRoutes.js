@@ -2,45 +2,47 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const Owner = require('../models/Owner');
+const User = require('../models/User');
 
-// Register Owner
+// Register User
 router.post('/register', async (req, res) => {
     try {
         const { name, email, password } = req.body;
 
-        // Check if owner exists
-        const existingOwner = await Owner.findOne({ email });
-        if (existingOwner) {
-            return res.status(400).json({ message: 'Owner already exists' });
+        // Check if user exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: 'User already exists' });
         }
 
         // Hash password
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        // Create new owner
-        const newOwner = new Owner({
+        // Create new user (defaulting role to owner for this portal)
+        const newUser = new User({
             name,
             email,
-            password: hashedPassword
+            password: hashedPassword,
+            role: 'owner'
         });
 
-        const savedOwner = await newOwner.save();
+        const savedUser = await newUser.save();
 
         // Create token
         const token = jwt.sign(
-            { id: savedOwner._id, name: savedOwner.name, email: savedOwner.email },
-            process.env.JWT_SECRET || 'fallback_secret', // Ideally, define JWT_SECRET in .env
-            { expiresIn: '1d' }
+            { id: savedUser._id, role: savedUser.role },
+            process.env.JWT_SECRET || 'fallback_secret',
+            { expiresIn: '30d' }
         );
 
         res.status(201).json({
             token,
-            owner: {
-                id: savedOwner._id,
-                name: savedOwner.name,
-                email: savedOwner.email
+            user: {
+                id: savedUser._id,
+                name: savedUser.name,
+                email: savedUser.email,
+                role: savedUser.role
             }
         });
     } catch (err) {
@@ -48,36 +50,37 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// Login Owner
+// Login User
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // Check if owner exists
-        const owner = await Owner.findOne({ email });
-        if (!owner) {
+        // Check if user exists
+        const user = await User.findOne({ email });
+        if (!user) {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
 
         // Validate password
-        const isMatch = await bcrypt.compare(password, owner.password);
+        const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
 
         // Create token
         const token = jwt.sign(
-            { id: owner._id, name: owner.name, email: owner.email },
+            { id: user._id, role: user.role },
             process.env.JWT_SECRET || 'fallback_secret',
-            { expiresIn: '1d' }
+            { expiresIn: '30d' }
         );
 
         res.json({
             token,
-            owner: {
-                id: owner._id,
-                name: owner.name,
-                email: owner.email
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role
             }
         });
     } catch (err) {

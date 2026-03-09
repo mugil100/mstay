@@ -1,5 +1,9 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
 import Layout from './components/Layout';
+import ProtectedRoute from './components/ProtectedRoute';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 import PgListingPage from './pages/PgListingPage';
 import RoomDetailsPage from './pages/RoomDetailsPage';
 import AvailabilityUpdatesPage from './pages/AvailabilityUpdatesPage';
@@ -11,19 +15,23 @@ import EditPgPage from './pages/EditPgPage';
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<OwnerDashboard />} />
-          <Route path="rooms" element={<RoomDetailsPage />} />
-          <Route path="availability" element={<AvailabilityUpdatesPage />} />
-          <Route path="visualizations" element={<VisualizationsPage />} />
-          <Route path="owner/add-pg" element={<AddPgPage />} />
-          <Route path="owner/manage-pgs" element={<ManagePgsPage />} />
-          <Route path="owner/edit-pg/:id" element={<EditPgPage />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+            <Route index element={<OwnerDashboard />} />
+            <Route path="rooms" element={<RoomDetailsPage />} />
+            <Route path="availability" element={<AvailabilityUpdatesPage />} />
+            <Route path="visualizations" element={<VisualizationsPage />} />
+            <Route path="owner/add-pg" element={<AddPgPage />} />
+            <Route path="owner/manage-pgs" element={<ManagePgsPage />} />
+            <Route path="owner/edit-pg/:id" element={<EditPgPage />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 

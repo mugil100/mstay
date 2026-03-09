@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const PgListing = require('../models/PgListing');
+const { protect } = require('../middleware/authMiddleware');
 
 // Get all PG Listings
-router.get('/', async (req, res) => {
+router.get('/', protect, async (req, res) => {
     try {
-        const listings = await PgListing.find();
+        const listings = await PgListing.find({ ownerId: req.user._id });
         res.json(listings);
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -13,7 +14,7 @@ router.get('/', async (req, res) => {
 });
 
 // Versatile Search Route
-router.get('/search/:query', async (req, res) => {
+router.get('/search/:query', protect, async (req, res) => {
     try {
         const query = req.params.query;
         const searchRegex = new RegExp(query, 'i');
@@ -29,7 +30,12 @@ router.get('/search/:query', async (req, res) => {
             searchCriteria.push({ _id: query });
         }
 
-        const listings = await PgListing.find({ $or: searchCriteria });
+        const listings = await PgListing.find({
+            $and: [
+                { ownerId: req.user._id },
+                { $or: searchCriteria }
+            ]
+        });
         res.json(listings);
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -37,10 +43,10 @@ router.get('/search/:query', async (req, res) => {
 });
 
 // Get single PG Listing
-router.get('/:id', async (req, res) => {
+router.get('/:id', protect, async (req, res) => {
     try {
-        const listing = await PgListing.findById(req.params.id);
-        if (!listing) return res.status(404).json({ message: 'Listing not found' });
+        const listing = await PgListing.findOne({ _id: req.params.id, ownerId: req.user._id });
+        if (!listing) return res.status(404).json({ message: 'Listing not found or unauthorized' });
         res.json(listing);
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -48,7 +54,8 @@ router.get('/:id', async (req, res) => {
 });
 
 // Create PG Listing
-router.post('/', async (req, res) => {
+router.post('/', protect, async (req, res) => {
+    req.body.ownerId = req.user._id;
     const listing = new PgListing(req.body);
     try {
         const newListing = await listing.save();
@@ -59,13 +66,14 @@ router.post('/', async (req, res) => {
 });
 
 // Update PG Listing
-router.put('/:id', async (req, res) => {
+router.put('/:id', protect, async (req, res) => {
     try {
-        const updatedListing = await PgListing.findByIdAndUpdate(
-            req.params.id,
+        const updatedListing = await PgListing.findOneAndUpdate(
+            { _id: req.params.id, ownerId: req.user._id },
             req.body,
             { new: true }
         );
+        if (!updatedListing) return res.status(404).json({ message: 'Listing not found or unauthorized' });
         res.json(updatedListing);
     } catch (err) {
         res.status(400).json({ message: err.message });
@@ -73,9 +81,10 @@ router.put('/:id', async (req, res) => {
 });
 
 // Delete PG Listing
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', protect, async (req, res) => {
     try {
-        await PgListing.findByIdAndDelete(req.params.id);
+        const deletedListing = await PgListing.findOneAndDelete({ _id: req.params.id, ownerId: req.user._id });
+        if (!deletedListing) return res.status(404).json({ message: 'Listing not found or unauthorized' });
         res.json({ message: 'Listing deleted' });
     } catch (err) {
         res.status(500).json({ message: err.message });

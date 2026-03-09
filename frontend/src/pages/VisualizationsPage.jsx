@@ -30,6 +30,18 @@ export default function VisualizationsPage() {
                 const rooms = roomResponse.data;
                 const availability = availabilityResponse.data;
 
+                // If the owner has no PGs, all lists should theoretically be empty or not renderable for charts
+                if (!pgs.length) {
+                    setData({
+                        pgsByLocation: [],
+                        roomsByType: [],
+                        availabilityStatus: [],
+                        acVsNonAc: []
+                    });
+                    setLoading(false);
+                    return;
+                }
+
                 // Process PG Data: Count PGs by Location
                 const locationCounts = pgs.reduce((acc, pg) => {
                     const loc = pg.location || 'Unknown';
@@ -105,6 +117,21 @@ export default function VisualizationsPage() {
         );
     }
 
+    const hasData = Object.values(data).some(arr => arr.length > 0);
+
+    if (!hasData) {
+        return (
+            <Box sx={{ mt: 4, textAlign: 'center' }}>
+                <Typography variant="h5" color="textSecondary" gutterBottom>
+                    No Data Available
+                </Typography>
+                <Typography variant="body1" color="textSecondary">
+                    Add a PG listing and room details to view analytics.
+                </Typography>
+            </Box>
+        );
+    }
+
     return (
         <Box sx={{ maxWidth: 1200, mx: 'auto', pb: 8 }}>
             <Typography variant="h4" fontWeight={800} gutterBottom sx={{ mb: 6, mt: 2, color: 'text.primary', textAlign: 'center' }}>
@@ -120,14 +147,20 @@ export default function VisualizationsPage() {
                                 PGs by Location
                             </Typography>
                             <ResponsiveContainer width="100%" height="85%">
-                                <BarChart data={data.pgsByLocation}>
-                                    <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis dataKey="name" />
-                                    <YAxis />
-                                    <Tooltip />
-                                    <Legend />
-                                    <Bar dataKey="count" fill="#8884d8" name="Number of PGs" />
-                                </BarChart>
+                                {data.pgsByLocation.length > 0 ? (
+                                    <BarChart data={data.pgsByLocation}>
+                                        <CartesianGrid strokeDasharray="3 3" />
+                                        <XAxis dataKey="name" />
+                                        <YAxis allowDecimals={false} />
+                                        <Tooltip />
+                                        <Legend />
+                                        <Bar dataKey="count" fill="#8884d8" name="Number of PGs" />
+                                    </BarChart>
+                                ) : (
+                                    <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+                                        <Typography color="textSecondary">Not enough data to display graph.</Typography>
+                                    </Box>
+                                )}
                             </ResponsiveContainer>
                         </CardContent>
                     </Card>
@@ -141,14 +174,20 @@ export default function VisualizationsPage() {
                                 Rooms by Type
                             </Typography>
                             <ResponsiveContainer width="100%" height="85%">
-                                <BarChart data={data.roomsByType}>
-                                    <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis dataKey="name" />
-                                    <YAxis />
-                                    <Tooltip />
-                                    <Legend />
-                                    <Bar dataKey="count" fill="#82ca9d" name="Number of Rooms" />
-                                </BarChart>
+                                {data.roomsByType.length > 0 ? (
+                                    <BarChart data={data.roomsByType}>
+                                        <CartesianGrid strokeDasharray="3 3" />
+                                        <XAxis dataKey="name" />
+                                        <YAxis allowDecimals={false} />
+                                        <Tooltip />
+                                        <Legend />
+                                        <Bar dataKey="count" fill="#82ca9d" name="Number of Rooms" />
+                                    </BarChart>
+                                ) : (
+                                    <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+                                        <Typography color="textSecondary">Not enough data to display graph.</Typography>
+                                    </Box>
+                                )}
                             </ResponsiveContainer>
                         </CardContent>
                     </Card>
@@ -162,22 +201,28 @@ export default function VisualizationsPage() {
                                 AC vs Non-AC Rooms
                             </Typography>
                             <ResponsiveContainer width="100%" height="90%">
-                                <PieChart>
-                                    <Pie
-                                        data={data.acVsNonAc}
-                                        cx="50%"
-                                        cy="50%"
-                                        outerRadius={100}
-                                        fill="#8884d8"
-                                        dataKey="value"
-                                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                                    >
-                                        {data.acVsNonAc.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip />
-                                </PieChart>
+                                {data.acVsNonAc.length > 0 ? (
+                                    <PieChart>
+                                        <Pie
+                                            data={data.acVsNonAc}
+                                            cx="50%"
+                                            cy="50%"
+                                            outerRadius={100}
+                                            fill="#8884d8"
+                                            dataKey="value"
+                                            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                        >
+                                            {data.acVsNonAc.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                            ))}
+                                        </Pie>
+                                        <Tooltip />
+                                    </PieChart>
+                                ) : (
+                                    <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+                                        <Typography color="textSecondary">Not enough data to display graph.</Typography>
+                                    </Box>
+                                )}
                             </ResponsiveContainer>
                         </CardContent>
                     </Card>
@@ -191,22 +236,28 @@ export default function VisualizationsPage() {
                                 Overall Availability Status
                             </Typography>
                             <ResponsiveContainer width="100%" height="90%">
-                                <PieChart>
-                                    <Pie
-                                        data={data.availabilityStatus}
-                                        cx="50%"
-                                        cy="50%"
-                                        outerRadius={100}
-                                        fill="#82ca9d"
-                                        dataKey="value"
-                                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                                    >
-                                        {data.availabilityStatus.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={COLORS[(index + 2) % COLORS.length]} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip />
-                                </PieChart>
+                                {data.availabilityStatus.length > 0 ? (
+                                    <PieChart>
+                                        <Pie
+                                            data={data.availabilityStatus}
+                                            cx="50%"
+                                            cy="50%"
+                                            outerRadius={100}
+                                            fill="#82ca9d"
+                                            dataKey="value"
+                                            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                        >
+                                            {data.availabilityStatus.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={COLORS[(index + 2) % COLORS.length]} />
+                                            ))}
+                                        </Pie>
+                                        <Tooltip />
+                                    </PieChart>
+                                ) : (
+                                    <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+                                        <Typography color="textSecondary">Not enough data to display graph.</Typography>
+                                    </Box>
+                                )}
                             </ResponsiveContainer>
                         </CardContent>
                     </Card>

@@ -16,12 +16,14 @@ const roomRoutes = require('./routes/roomRoutes');
 const availabilityRoutes = require('./routes/availabilityRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 app.use('/api/pg', pgRoutes);
 app.use('/api/rooms', roomRoutes);
 app.use('/api/availability', availabilityRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/auth', authRoutes);
 
 // Global Error Handler
 app.use((err, req, res, next) => {
