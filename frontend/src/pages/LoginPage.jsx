@@ -63,7 +63,7 @@ const LoginPage = () => {
                     />
                 </Box>
                 <Typography variant="h6" gutterBottom textAlign="center" mb={3}>
-                    Owner Login
+                    Login
                 </Typography>
 
                 {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
