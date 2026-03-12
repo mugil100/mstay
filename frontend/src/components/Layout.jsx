@@ -35,13 +35,18 @@ export default function Layout() {
     return (
         <Box sx={{ display: 'flex' }}>
             <CssBaseline />
-            <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+            <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, backgroundColor: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}>
                 <Toolbar>
-                    <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 800, color: 'primary.main', letterSpacing: 1 }}>
-                        MOV Stay
-                    </Typography>
+                    <Box
+                        component="img"
+                        src="/MOV Stay Logo.png"
+                        alt="MOV Stay Logo"
+                        sx={{ height: 44, objectFit: 'contain', cursor: 'pointer' }}
+                        onClick={() => navigate('/')}
+                    />
                 </Toolbar>
             </AppBar>
+
             <Drawer
                 variant="permanent"
                 sx={{

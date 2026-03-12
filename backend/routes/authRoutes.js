@@ -88,4 +88,64 @@ router.post('/login', async (req, res) => {
     }
 });
 
+// Google OAuth - Find or Create User
+router.post('/google', async (req, res) => {
+    try {
+        const { credential } = req.body;
+
+        if (!credential) {
+            return res.status(400).json({ message: 'No Google credential provided' });
+        }
+
+        // Decode the Google ID token (the frontend @react-oauth/google already validated it)
+        const decoded = jwt.decode(credential);
+        if (!decoded || !decoded.email) {
+            return res.status(400).json({ message: 'Invalid Google token' });
+        }
+
+        const { email, name, sub: googleId } = decoded;
+
+        // Find existing user or create a new one
+        let user = await User.findOne({ email });
+
+        if (user) {
+            // Link Google ID to existing account if not already linked
+            if (!user.googleId) {
+                user.googleId = googleId;
+                await user.save();
+            }
+        } else {
+            // Create new user from Google account (no password)
+            user = new User({
+                name,
+                email,
+                googleId,
+                password: null,
+                role: 'owner'
+            });
+            await user.save();
+        }
+
+        // Create app JWT (same shape as email/password login)
+        const token = jwt.sign(
+            { id: user._id, role: user.role },
+            process.env.JWT_SECRET || 'fallback_secret',
+            { expiresIn: '30d' }
+        );
+
+        res.json({
+            token,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role
+            }
+        });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
 module.exports = router;
+
