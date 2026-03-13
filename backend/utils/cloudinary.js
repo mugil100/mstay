@@ -19,6 +19,9 @@ const storage = new CloudinaryStorage({
     }
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ 
+    storage: storage,
+    limits: { fileSize: 4 * 1024 * 1024 } // Limit individual files to 4MB to stay under Vercel's 4.5MB total limit
+});
 
 module.exports = { cloudinary, upload };
