@@ -3,9 +3,10 @@ const mongoose = require('mongoose');
 const PgAvailabilitySchema = new mongoose.Schema({
     roomId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "PgRoom"
+        ref: "PgRoom",
+        required: true
     },
-    availableBeds: Number,
+    availableBeds: { type: Number, min: 0 },
     status: {
         type: String,
         enum: ["Available", "Limited", "Full"]

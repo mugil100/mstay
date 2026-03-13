@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const PgListingSchema = new mongoose.Schema({
     pgName: {
         type: String,
-        required: true
+        required: true,
+        trim: true
     },
     address: String,
     location: String,
@@ -15,7 +16,10 @@ const PgListingSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
-    rent: Number,
+    rent: {
+        type: Number,
+        min: 0
+    },
     genderPreference: {
         type: String,
         enum: ['Boys', 'Girls', 'Co-ed']

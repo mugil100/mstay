@@ -1,0 +1,507 @@
+================================================================================
+  MOV STAY - COMPLETE PROJECT DESCRIPTION
+  For Design Reference | Generated: March 2026
+================================================================================
+
+
+--------------------------------------------------------------------------------
+1. PROJECT OVERVIEW
+--------------------------------------------------------------------------------
+
+Name        : MOV Stay
+Type        : Full-Stack Web Application (MERN Stack)
+Purpose     : A PG (Paying Guest) / Hostel Management Platform designed for
+              property owners (landlords) to manage their PG listings, rooms,
+              availability, and view analytics — all from a single dashboard.
+
+Target Users:
+  - Owners     : Manage PG properties, rooms, availability status.
+  - Students   : Book/view PG accommodation (data exists in DB, future feature).
+  - Admins     : Superusers with full access (future feature).
+
+Hosted DB    : MongoDB Atlas (cluster: ai-rehab-admin.jdodnnl.mongodb.net)
+               Database Name: mov_stay
+
+Tech Stack:
+  Frontend  : React (Vite), Material UI (MUI), Recharts, React Router v6
+  Backend   : Node.js, Express.js v5
+  Database  : MongoDB (Mongoose ODM)
+  Auth      : JWT (JSON Web Tokens) + bcrypt password hashing
+  Storage   : Cloudinary (image uploads via Multer)
+  AI Data   : @faker-js/faker (synthetic data seeder)
+
+
+--------------------------------------------------------------------------------
+2. PROJECT DIRECTORY STRUCTURE
+--------------------------------------------------------------------------------
+
+mov_stay/
+├── backend/
+│   ├── server.js                 → Express app entry point
+│   ├── .env                      → Environment variables
+│   ├── seed.js                   → Original data seeder
+│   ├── seedAIData.js             → AI synthetic data seeder (500 users, 150 PGs, 1200 reviews)
+│   ├── models/                   → Mongoose schemas (15 models)
+│   ├── controllers/              → Business logic handlers
+│   ├── routes/                   → API route definitions (6 route files)
+│   ├── middleware/               → Auth middleware (JWT verification)
+│   └── utils/                    → Utility helpers
+│
+└── frontend/
+    └── src/
+        ├── App.jsx               → Root router configuration
+        ├── main.jsx              → React entry point
+        ├── theme.js              → MUI theme configuration
+        ├── components/
+        │   ├── Layout.jsx        → Sidebar + AppBar shell (shared layout)
+        │   └── ProtectedRoute.jsx → Auth guard wrapper
+        ├── context/
+        │   └── AuthContext.jsx   → Global auth state (login/logout/user)
+        ├── pages/                → 11 page components (see Section 4)
+        └── services/
+            └── api.js            → Axios instance (base URL + JWT header)
+
+
+--------------------------------------------------------------------------------
+3. BACKEND API STRUCTURE
+--------------------------------------------------------------------------------
+
+Server runs on: http://localhost:5000
+
+API Routes:
+  /api/auth         → authRoutes.js        (register, login, JWT token)
+  /api/pg           → pgRoutes.js          (CRUD for PG listings)
+  /api/rooms        → roomRoutes.js        (CRUD for rooms, search)
+  /api/availability → availabilityRoutes.js (read/update bed availability)
+  /api/dashboard    → dashboardRoutes.js   (owner stats, recent activity)
+  /api/upload       → uploadRoutes.js      (Cloudinary image uploads)
+
+Authentication:
+  - JWT token stored on client (localStorage or context)
+  - authMiddleware.js validates Bearer token on protected routes
+  - Roles: student | owner | admin
+
+--------------------------------------------------------------------------------
+4. DATABASE MODELS (15 Mongoose Schemas)
+--------------------------------------------------------------------------------
+
+Core Models:
+  User              → name, email, password (hashed), role, phone, profileImage
+  PgListing         → pgName, address, location, neighborhoodId, ownerId,
+                      rent, genderPreference, amenities{}, images[], description,
+                      isActive
+  PgRoom            → pgId (ref), roomType (Single/Double/Triple/Dormitory),
+                      sharingCapacity, totalBeds, roomRent, acAvailable
+  PgAvailability    → roomId (ref), availableBeds, status (Available/Limited/Full),
+                      lastUpdatedOn
+  PgReview          → pgId, studentId, rating (1-5), reviewText, sentimentScore
+
+Supporting Models:
+  Neighborhood      → locationName, city, safetyScore, transportScore,
+                      convenienceScore, lifestyleScore, environmentScore,
+                      averageRent, nearbyHospitals[], nearbyColleges[],
+                      nearbyTransport[], popularAmenities[]
+  StudentProfile    → userId (ref), preferences, budget, preferredLocations[]
+  RoommatePreference → userId, preferences object
+  RoommateMatch     → user1Id, user2Id, compatibilityScore
+  VisitBooking      → studentId, pgId, scheduledDate, status
+  Favorite          → studentId, pgId
+  Complaint         → userId, pgId, complaintText, status
+  Notification      → userId, message, isRead, createdAt
+  RecommendationLog → studentId, recommendedPgIds[], algorithm used
+  Owner             → userId (ref), additional owner profile fields
+
+
+--------------------------------------------------------------------------------
+5. PAGE-BY-PAGE DESCRIPTION
+--------------------------------------------------------------------------------
+
+All authenticated pages share the Layout: a permanent left sidebar (240px wide)
+and a top AppBar with the "MOV Stay" brand name.
+
+
+--- PAGE 1: Login Page ---
+Route       : /login
+File        : LoginPage.jsx
+Access      : Public (no auth required)
+Description : Credential entry page. No sidebar or AppBar. Standalone centered
+              form. User enters email and password. On success, JWT is stored
+              and user is redirected to dashboard (/).
+
+UI Elements:
+  - Email input field
+  - Password input field
+  - Login button (submits to POST /api/auth/login)
+  - Link to Register page
+
+
+--- PAGE 2: Register Page ---
+Route       : /register
+File        : RegisterPage.jsx
+Access      : Public (no auth required)
+Description : New user registration form. Standalone page, no sidebar.
+              Users pick a role (student/owner) during signup.
+
+UI Elements:
+  - Name input
+  - Email input
+  - Password input
+  - Role selector (dropdown: student / owner)
+  - Register button (submits to POST /api/auth/register)
+  - Link back to Login
+
+
+--- PAGE 3: Owner Dashboard (Home / Index) ---
+Route       : / (index route, default page after login)
+File        : OwnerDashboard.jsx
+Access      : Protected (requires login)
+Description : The main landing page after login. Shows a summary of the logged-in
+              owner's PG portfolio in real-time KPI cards plus activity feeds.
+
+UI Layout:
+  TOP SECTION — 4 KPI Stat Cards (in a row):
+    - Total PGs          (blue card, Home icon)
+    - Total Rooms        (purple card, BedroomParent icon)
+    - Available Beds     (green card, Hotel icon)
+    - Visit Requests     (orange card, ContactPage icon)
+    Cards have hover animation (translateY -5px).
+
+  MIDDLE SECTION — Occupancy Rate Bar:
+    - A full-width LinearProgress bar showing overall occupancy %
+    - Color changes: green (>80%), warning (>50%), red (<50%)
+    - Percentage label shown next to bar
+
+  BOTTOM SECTION — Two side-by-side panels:
+    Left Panel : "Recent Activity" — list of recent events with dates
+    Right Panel: "Recent Listings Added" — last added PGs with name, location, rent
+
+  Data Source: GET /api/dashboard/owner-stats
+
+
+--- PAGE 4: PG Listing Management ---
+Route       : /  (accessible via sidebar — note: this is NOT the same as dashboard;
+              'PgListingPage' is an alternate Admin CRUD for PG data; currently
+              NOT in the router - it maps to PgListingPage.jsx but the sidebar
+              doesn't link to it directly; it appears to be an older admin view)
+Route Note  : This page is present as a component but not actively routed in
+              the current App.jsx. It's functional if routed.
+File        : PgListingPage.jsx
+Description : Full CRUD management table for PG listings. Meant for admin-level
+              access to insert, update, delete any PG listing.
+
+UI Layout:
+  TOP FORM CARD — "Add / Update PG Listing":
+    - PG Name (text input)
+    - Location (text input)
+    - Address (multiline text area)
+    - Monthly Rent (number input)
+    - Gender Preference (dropdown: Boys / Girls / Co-ed)
+    - Active Status (toggle switch)
+    - Description (multiline)
+    - Insert / Update Button (color changes: blue for Insert, orange for Update)
+    - Cancel button (appears only in edit mode)
+
+  BOTTOM DATA GRID — "All PG Listings":
+    - Columns: PG Name, Location, Monthly Rent, Gender, Status (bool), Actions
+    - Actions: Edit (pencil), Delete (trash) per row
+    - Search bar with "Search" and "Clear" buttons
+    - MUI DataGrid with pagination (5 / 10 / 20 per page)
+
+  DIALOGS:
+    - Confirm Delete dialog (irreversible warning)
+    - Confirm Insert/Update dialog (action confirmation)
+    - Snackbar toast notifications (success / error / warning)
+
+
+--- PAGE 5: Add PG Page ---
+Route       : /owner/add-pg
+File        : AddPgPage.jsx
+Access      : Protected (owner role)
+Description : Owner-facing form to list a new PG property. Includes image
+              upload to Cloudinary.
+
+UI Layout:
+  Multi-field form:
+    - PG Name
+    - Address
+    - Location (area name)
+    - Rent
+    - Gender Preference (Boys / Girls / Co-ed)
+    - Amenities checkboxes: WiFi, Food, Laundry, Parking, Power Backup,
+      CCTV, Gym, Study Room
+    - Image upload input (sends file to POST /api/upload, stores Cloudinary URL)
+    - Description (text area)
+    - Submit button → POST /api/pg
+
+
+--- PAGE 6: Manage PGs Page ---
+Route       : /owner/manage-pgs
+File        : ManagePgsPage.jsx
+Access      : Protected (owner role)
+Description : Shows all PGs created by the currently logged-in owner.
+              Owner can edit or delete their own listings.
+
+UI Layout:
+  - Card grid of PG listings owned by the current user
+  - Each card shows: PG image, name, location, rent, gender, active status
+  - Edit button → navigates to /owner/edit-pg/:id
+  - Delete button → confirms then deletes via DELETE /api/pg/:id
+
+
+--- PAGE 7: Edit PG Page ---
+Route       : /owner/edit-pg/:id
+File        : EditPgPage.jsx
+Access      : Protected (owner role, must own the PG)
+Description : Pre-filled form for editing an existing PG listing. Same fields
+              as AddPgPage. Fetches PG data by ID on load.
+
+UI Layout:
+  Same form structure as Add PG Page.
+  - All fields pre-populated from existing PG data
+  - Image shows current uploaded image; owner can re-upload
+  - Save Changes button → PUT /api/pg/:id
+
+
+--- PAGE 8: Room Details Page ---
+Route       : /rooms
+File        : RoomDetailsPage.jsx
+Access      : Protected
+Description : CRUD management interface for individual room configurations
+              linked to a PG listing. Each PG can have multiple room types.
+
+UI Layout:
+  TOP FORM CARD — "Add / Update Room":
+    - Select Parent PG Listing (Autocomplete dropdown from /api/pg)
+    - Room Type (dropdown: Single / Double / Triple / Dormitory)
+    - Sharing Capacity (number: 1 / 2 / 3 / 6)
+    - Total Beds (number)
+    - Room Rent (number, in ₹)
+    - AC Available (toggle switch)
+    - Insert / Update / Cancel buttons
+
+  BOTTOM DATA GRID — "All Rooms":
+    - Columns: Parent PG, Room Type, Sharing Cap, Total Beds, Rent, AC (bool), Actions
+    - Search bar (by ID, Room Type, details)
+    - Actions: Edit, Delete per row
+    - Pagination (5 / 10 / 20)
+
+  DIALOGS & TOASTS: Same pattern as PgListingPage
+
+
+--- PAGE 9: Availability Updates Page ---
+Route       : /availability
+File        : AvailabilityUpdatesPage.jsx
+Access      : Protected
+Description : Displays real-time bed availability across all rooms. Owners can
+              manually update how many beds are available and change room status.
+              No delete option — only read and update.
+
+UI Layout:
+  TOP BAR: Title "Availability Updates" + "Update Availability" button (top-right)
+
+  DATA GRID — "Current Room Availabilities":
+    - Columns: PG Name, Room Type, Total Beds, Available Beds, Status, Last Updated, Edit
+    - Search bar (filter by PG name, room type, or status)
+    - Status values: Available | Limited | Full
+    - Pagination (5 / 10 / 20)
+
+  UPDATE DIALOG (opens on Edit or "Update Availability" button):
+    - Select Room (dropdown; disabled when editing existing)
+    - Available Beds (number input)
+    - Status (dropdown: Available / Limited / Full)
+    - Save Changes button → PUT /api/availability/:roomId
+
+
+--- PAGE 10: Visualizations Page ---
+Route       : /visualizations
+File        : VisualizationsPage.jsx
+Access      : Protected (shows only owner's own data)
+Description : Analytics and charting page. Fetches data from 3 APIs concurrently
+              and renders 4 charts using Recharts. Scoped to logged-in owner's PGs.
+
+UI Layout:
+  Page Title: "System Visualizations & Analytics" (centered)
+
+  4 Chart Cards (stacked vertically, each 500px tall):
+    Chart 1: "PGs by Location" (Bar Chart)
+      - X-axis: Location name (e.g., Velachery, Adyar)
+      - Y-axis: Number of PGs
+      - Bar color: #8884d8 (purple)
+
+    Chart 2: "Rooms by Type" (Bar Chart)
+      - X-axis: Room type (Single, Double, Triple, Dormitory)
+      - Y-axis: Number of rooms
+      - Bar color: #82ca9d (green)
+
+    Chart 3: "AC vs Non-AC Rooms" (Pie Chart)
+      - Two segments: AC / Non-AC
+      - Slice labels show name + percentage
+      - Multi-color palette: #0088FE, #00C49F, ...
+
+    Chart 4: "Overall Availability Status" (Pie Chart)
+      - Three segments: Available / Limited / Full
+      - Slice labels show name + percentage
+      - Offset colors from Chart 3 palette
+
+  States:
+    - Loading: CircularProgress spinner
+    - Error: MUI Alert error banner
+    - No data: Message "Add a PG listing and room details to view analytics"
+
+
+--- PAGE 11: Auth Page (Legacy) ---
+Route       : (Not in current router)
+File        : AuthPage.jsx
+Description : An older combined Login + Register toggle page. Current app uses
+              separate LoginPage.jsx and RegisterPage.jsx. This file may be
+              kept for reference or future redesign.
+
+
+--------------------------------------------------------------------------------
+6. SHARED LAYOUT COMPONENTS
+--------------------------------------------------------------------------------
+
+Layout.jsx (Shell for all authenticated pages):
+  AppBar (top, fixed, z-index above drawer):
+    - Brand label: "MOV Stay" (bold, primary color, letter-spacing)
+    - Height: 64px (MUI default Toolbar)
+
+  Sidebar Drawer (permanent, left, 240px wide):
+    Navigation Items (with icon + label):
+      1. Dashboard         → /          (DashboardIcon)
+      2. Add PG            → /owner/add-pg   (AddBoxIcon)
+      3. Manage PGs        → /owner/manage-pgs (ManageAccountsIcon)
+      4. Room Details      → /rooms     (BedroomParentIcon)
+      5. Availability Updates → /availability (EventAvailableIcon)
+      6. Visualizations    → /visualizations (PieChartIcon)
+
+    Active item highlight: primary.light background, white text+icon
+    Hover: slightly darker shade
+
+    Bottom of sidebar (separated by Divider):
+      - Logout button (LogoutIcon, red color, red-light hover bg)
+        → clears auth context → navigates to /login
+
+  Main Content Area (right of drawer):
+    - Padding: 24px (p: 3)
+    - Renders current page via <Outlet />
+
+
+ProtectedRoute.jsx:
+  - Checks AuthContext for valid user/token
+  - If not authenticated → redirects to /login
+  - If authenticated → renders children
+
+
+--------------------------------------------------------------------------------
+7. AUTHENTICATION FLOW
+--------------------------------------------------------------------------------
+
+1. User visits any protected route → ProtectedRoute checks AuthContext
+2. If not logged in → redirect to /login
+3. User enters credentials → POST /api/auth/login
+4. Server validates, returns JWT token + user object
+5. AuthContext stores user + token (persisted likely in localStorage)
+6. All API calls from api.js attach Authorization: Bearer <token> header
+7. Backend authMiddleware.js verify token → attach user to req.user
+8. Owner-specific routes filter data by req.user._id (ownerId)
+
+Roles defined:
+  student  : Can browse PGs, book visits, write reviews (future pages)
+  owner    : Full CRUD on their PGs, rooms, availability
+  admin    : Full database access (future implementation)
+
+
+--------------------------------------------------------------------------------
+8. SYNTHETIC AI DATA (seedAIData.js)
+--------------------------------------------------------------------------------
+
+Purpose: Generate realistic synthetic data for AI/ML model training.
+
+Generated Collections:
+  Users         : 500 total
+                   - 400 students  (role: "student")
+                   -  80 owners    (role: "owner")
+                   -  20 admins    (role: "admin")
+                  All passwords: "password123" (bcrypt hashed)
+
+  Neighborhoods : 10 areas in Chennai:
+                  Velachery, Adyar, Taramani, Guindy, Tambaram,
+                  Anna Nagar, Perungudi, Sholinganallur, Chromepet, Medavakkam
+                  Each with: safety/transport/convenience/lifestyle/env scores,
+                  averageRent, hospitals, colleges, transport, amenities
+
+  PgListings    : 150 PG properties
+                  Random owner assigned, random neighborhood, rent ₹4k-₹14k
+                  Amenities: WiFi, food, laundry, parking, powerBackup, CCTV,
+                  gym, studyRoom (mix of true/false)
+
+  PgRooms       : 4 rooms per PG × 150 PGs = 600 rooms
+                  Types: Single(₹9k-₹14k), Double(₹7k-₹10k),
+                         Triple(₹5k-₹8k), Dormitory(₹3.5k-₹5.5k)
+
+  PgAvailability: 1 record per room = 600 records
+                  Occupancy by rent: <₹5k→90%, <₹9k→70%, else→50%
+                  Status: Available | Limited | Full
+
+  PgReviews     : 1200 reviews
+                  Rating 1-5, sentiment score = rating/5
+                  Text templates: positive (≥4), average (3), negative (<3)
+
+
+--------------------------------------------------------------------------------
+9. DESIGN SYSTEM (MUI Theme - theme.js)
+--------------------------------------------------------------------------------
+
+Framework    : Material UI (MUI v5+)
+Color Mode   : Light mode (default)
+Typography   : MUI default typography scale
+
+Component Overrides (from theme.js):
+  - Custom primary/secondary palette colors
+  - Rounded card corners (borderRadius)
+  - Elevation shadows on cards
+  - Button border-radius customizations
+
+Fonts: MUI default (Roboto)
+
+
+--------------------------------------------------------------------------------
+10. AGENTIC AI INTEGRATION (Planned / In-Progress)
+--------------------------------------------------------------------------------
+
+The project is being developed with Agentic AI features for:
+
+Core AI Use Cases (based on models present):
+  1. Personalized PG Recommendations
+     - Model: RecommendationLog
+     - Input: StudentProfile (budget, location preferences)
+     - Output: Top PG matches with scoring
+
+  2. Neighborhood Intelligence
+     - Model: Neighborhood (multi-dimensional scores)
+     - Used for: location-based filtering + AI ranking
+
+  3. Roommate Matching
+     - Models: RoommatePreference, RoommateMatch
+     - AI matches students by preference compatibility scores
+
+  4. Sentiment Analysis on Reviews
+     - Model: PgReview (sentimentScore field)
+     - Used to rank PG quality from student reviews
+
+  5. Occupancy Prediction
+     - Models: PgAvailability, PgRoom (rent tiers)
+     - Synthetic occupancy rates already encoded in seeded data
+
+AI-Ready Dataset Fields:
+  - sentimentScore (review sentiment 0.0–1.0)
+  - safetyScore, transportScore, convenienceScore (neighborhood quality)
+  - occupancyRate (availability status → occupancy pattern)
+
+
+================================================================================
+  END OF DOCUMENT
+  File: project_description.txt
+  Project: MOV Stay | Review 2 FSF | March 2026
+================================================================================

@@ -1,23 +1,116 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Box,
-    Typography,
-    Grid,
-    Card,
-    CardContent,
-    CircularProgress,
-    List,
-    ListItem,
-    ListItemText,
-    Divider,
-    Paper,
-    LinearProgress
+    Box, Typography, Grid, Card, CardContent, CircularProgress,
+    Divider, Paper, LinearProgress, Chip, Avatar
 } from '@mui/material';
-import HomeIcon from '@mui/icons-material/Home';
-import BedroomParentIcon from '@mui/icons-material/BedroomParent';
-import HotelIcon from '@mui/icons-material/Hotel';
-import ContactPageIcon from '@mui/icons-material/ContactPage';
+import HomeWorkRoundedIcon from '@mui/icons-material/HomeWorkRounded';
+import BedroomParentRoundedIcon from '@mui/icons-material/BedroomParentRounded';
+import HotelRoundedIcon from '@mui/icons-material/HotelRounded';
+import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
+import FiberManualRecordRoundedIcon from '@mui/icons-material/FiberManualRecordRounded';
+import LocationOnRoundedIcon from '@mui/icons-material/LocationOnRounded';
+import CurrencyRupeeRoundedIcon from '@mui/icons-material/CurrencyRupeeRounded';
 import api from '../services/api';
+
+const kpiConfig = [
+    {
+        key: 'totalPgs',
+        title: 'Total PGs',
+        icon: <HomeWorkRoundedIcon sx={{ fontSize: 28 }} />,
+        gradient: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)',
+        lightBg: '#EFF6FF',
+        iconColor: '#2563EB',
+        suffix: '',
+    },
+    {
+        key: 'totalRooms',
+        title: 'Total Rooms',
+        icon: <BedroomParentRoundedIcon sx={{ fontSize: 28 }} />,
+        gradient: 'linear-gradient(135deg, #14B8A6 0%, #0F766E 100%)',
+        lightBg: '#F0FDFA',
+        iconColor: '#14B8A6',
+        suffix: '',
+    },
+    {
+        key: 'availableBeds',
+        title: 'Available Beds',
+        icon: <HotelRoundedIcon sx={{ fontSize: 28 }} />,
+        gradient: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+        lightBg: '#ECFDF5',
+        iconColor: '#10B981',
+        suffix: '',
+    },
+    {
+        key: 'visitRequests',
+        title: 'Visit Requests',
+        icon: <VisibilityRoundedIcon sx={{ fontSize: 28 }} />,
+        gradient: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
+        lightBg: '#FFFBEB',
+        iconColor: '#F59E0B',
+        suffix: '',
+    },
+];
+
+const OccupancyBar = ({ rate }) => {
+    const numRate = Number(rate) || 0;
+    const color = numRate > 80 ? '#10B981' : numRate > 50 ? '#F59E0B' : '#EF4444';
+    const label = numRate > 80 ? 'Excellent' : numRate > 50 ? 'Moderate' : 'Low';
+
+    return (
+        <Card sx={{ p: 3, mb: 3 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Box>
+                    <Typography sx={{ fontWeight: 700, fontSize: '1rem', color: '#111827' }}>
+                        Overall Occupancy Rate
+                    </Typography>
+                    <Typography sx={{ fontSize: '0.8rem', color: '#6B7280', mt: 0.25 }}>
+                        Across all your PG properties
+                    </Typography>
+                </Box>
+                <Box sx={{ textAlign: 'right' }}>
+                    <Typography sx={{ fontWeight: 800, fontSize: '1.8rem', color, lineHeight: 1 }}>
+                        {numRate}%
+                    </Typography>
+                    <Chip
+                        label={label}
+                        size="small"
+                        sx={{
+                            mt: 0.5, fontSize: '0.72rem', fontWeight: 700, height: 20,
+                            backgroundColor: color + '20', color,
+                        }}
+                    />
+                </Box>
+            </Box>
+            <Box sx={{ position: 'relative' }}>
+                <LinearProgress
+                    variant="determinate"
+                    value={numRate}
+                    sx={{
+                        height: 14, borderRadius: 8,
+                        backgroundColor: '#F3F4F6',
+                        '& .MuiLinearProgress-bar': {
+                            background: `linear-gradient(90deg, ${color}99 0%, ${color} 100%)`,
+                            borderRadius: 8,
+                        },
+                    }}
+                />
+                {/* Threshold markers */}
+                <Box sx={{ position: 'absolute', top: -6, left: '50%', transform: 'translateX(-50%)' }}>
+                    <Box sx={{ width: 2, height: 26, backgroundColor: '#D1D5DB', borderRadius: 1 }} />
+                </Box>
+                <Box sx={{ position: 'absolute', top: -6, left: '80%', transform: 'translateX(-50%)' }}>
+                    <Box sx={{ width: 2, height: 26, backgroundColor: '#D1D5DB', borderRadius: 1 }} />
+                </Box>
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                <Typography sx={{ fontSize: '0.7rem', color: '#9CA3AF' }}>0%</Typography>
+                <Typography sx={{ fontSize: '0.7rem', color: '#9CA3AF' }}>50% threshold</Typography>
+                <Typography sx={{ fontSize: '0.7rem', color: '#9CA3AF' }}>80% threshold</Typography>
+                <Typography sx={{ fontSize: '0.7rem', color: '#9CA3AF' }}>100%</Typography>
+            </Box>
+        </Card>
+    );
+};
 
 const OwnerDashboard = () => {
     const [stats, setStats] = useState(null);
@@ -29,21 +122,20 @@ const OwnerDashboard = () => {
             try {
                 const response = await api.get('/dashboard/owner-stats');
                 setStats(response.data);
-                setLoading(false);
             } catch (err) {
-                console.error("Failed to fetch dashboard stats", err);
                 setError('Failed to load dashboard statistics.');
+            } finally {
                 setLoading(false);
             }
         };
-
         fetchStats();
     }, []);
 
     if (loading) {
         return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
-                <CircularProgress />
+            <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '60vh', gap: 2 }}>
+                <CircularProgress sx={{ color: '#2563EB' }} size={44} />
+                <Typography sx={{ color: '#6B7280', fontSize: '0.875rem' }}>Loading dashboard...</Typography>
             </Box>
         );
     }
@@ -56,124 +148,161 @@ const OwnerDashboard = () => {
         );
     }
 
-    const statCards = [
-        { title: 'Total PGs', value: stats.totalPgs, icon: <HomeIcon fontSize="large" color="primary" />, color: '#e3f2fd' },
-        { title: 'Total Rooms', value: stats.totalRooms, icon: <BedroomParentIcon fontSize="large" color="secondary" />, color: '#f3e5f5' },
-        { title: 'Available Beds', value: stats.availableBeds, icon: <HotelIcon fontSize="large" color="success" />, color: '#e8f5e9' },
-        { title: 'Visit Requests', value: stats.visitRequests, icon: <ContactPageIcon fontSize="large" color="warning" />, color: '#fff3e0' },
-    ];
-
     return (
-        <Box sx={{ p: 3 }}>
-            <Typography variant="h4" fontWeight="bold" gutterBottom sx={{ color: 'primary.main', mb: 4 }}>
-                Owner Dashboard
-            </Typography>
+        <Box className="fade-in-up">
+            {/* Page Header */}
+            <Box sx={{ mb: 4 }}>
+                <Typography sx={{ fontWeight: 800, fontSize: '1.75rem', color: '#111827', lineHeight: 1.2 }}>
+                    Dashboard Overview
+                </Typography>
+                <Typography sx={{ color: '#6B7280', fontSize: '0.875rem', mt: 0.5 }}>
+                    Here's what's happening with your PG portfolio today
+                </Typography>
+            </Box>
 
-            <Grid container spacing={4} sx={{ mb: 6 }}>
-                {statCards.map((stat, index) => (
-                    <Grid item xs={12} sm={6} md={3} key={index}>
-                        <Card sx={{
-                            height: '100%',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'center',
-                            backgroundColor: stat.color,
-                            boxShadow: 3,
-                            borderRadius: 3,
-                            transition: 'transform 0.2s',
-                            '&:hover': { transform: 'translateY(-5px)' }
-                        }}>
-                            <CardContent sx={{ textAlign: 'center' }}>
-                                <Box sx={{ mb: 2 }}>{stat.icon}</Box>
-                                <Typography variant="h3" fontWeight="bold" color="text.primary">
-                                    {stat.value}
-                                </Typography>
-                                <Typography variant="subtitle1" color="text.secondary" fontWeight="medium">
-                                    {stat.title}
-                                </Typography>
-                            </CardContent>
+            {/* KPI Cards */}
+            <Grid container spacing={3} sx={{ mb: 4 }}>
+                {kpiConfig.map((kpi, idx) => (
+                    <Grid item xs={12} sm={6} lg={3} key={kpi.key}>
+                        <Card
+                            className="card-lift"
+                            sx={{
+                                p: 0, overflow: 'hidden', cursor: 'default',
+                                animationDelay: `${idx * 80}ms`
+                            }}
+                        >
+                            <Box sx={{
+                                p: 2.5,
+                                display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
+                            }}>
+                                <Box>
+                                    <Typography sx={{ fontSize: '0.78rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', mb: 1 }}>
+                                        {kpi.title}
+                                    </Typography>
+                                    <Typography sx={{ fontWeight: 800, fontSize: '2.5rem', color: '#111827', lineHeight: 1 }}>
+                                        {stats[kpi.key] ?? 0}
+                                    </Typography>
+                                </Box>
+                                <Box sx={{
+                                    width: 52, height: 52, borderRadius: '14px',
+                                    background: kpi.gradient,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    boxShadow: `0 6px 16px ${kpi.iconColor}40`,
+                                    flexShrink: 0,
+                                }}>
+                                    <Box sx={{ color: '#fff' }}>{kpi.icon}</Box>
+                                </Box>
+                            </Box>
+                            {/* Bottom color bar */}
+                            <Box sx={{ height: 4, background: kpi.gradient }} />
                         </Card>
                     </Grid>
                 ))}
             </Grid>
 
-            {/* Occupancy Rate Section */}
-            <Box sx={{ mb: 6 }}>
-                <Typography variant="h6" fontWeight="bold" gutterBottom>
-                    Overall Occupancy Rate
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Box sx={{ width: '100%', mr: 1 }}>
-                        <LinearProgress
-                            variant="determinate"
-                            value={Number(stats.occupancyRate)}
-                            sx={{ height: 12, borderRadius: 6 }}
-                            color={stats.occupancyRate > 80 ? 'success' : stats.occupancyRate > 50 ? 'warning' : 'error'}
-                        />
-                    </Box>
-                    <Box sx={{ minWidth: 35 }}>
-                        <Typography variant="body2" color="text.secondary">{`${stats.occupancyRate}%`}</Typography>
-                    </Box>
-                </Box>
-            </Box>
+            {/* Occupancy Bar */}
+            <OccupancyBar rate={stats.occupancyRate} />
 
-            <Grid container spacing={4}>
+            {/* Activity Panels */}
+            <Grid container spacing={3}>
                 {/* Recent Activity */}
                 <Grid item xs={12} md={6}>
-                    <Paper elevation={3} sx={{ p: 3, borderRadius: 3, height: '100%' }}>
-                        <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ borderBottom: '2px solid', borderColor: 'divider', pb: 1 }}>
-                            Recent Activity
-                        </Typography>
-                        {stats.recentActivity.length > 0 ? (
-                            <List>
-                                {stats.recentActivity.map((activity, index) => (
-                                    <React.Fragment key={activity.id || index}>
-                                        <ListItem alignItems="flex-start" sx={{ px: 0 }}>
-                                            <ListItemText
-                                                primary={String(activity.description)}
-                                                secondary={new Date(activity.date).toLocaleDateString()}
-                                                primaryTypographyProps={{ variant: 'body1', fontWeight: 500 }}
-                                            />
-                                        </ListItem>
-                                        {index < stats.recentActivity.length - 1 && <Divider component="li" />}
-                                    </React.Fragment>
-                                ))}
-                            </List>
-                        ) : (
-                            <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-                                No recent activity found.
+                    <Card sx={{ height: '100%' }}>
+                        <Box sx={{ p: 3, pb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Typography sx={{ fontWeight: 700, fontSize: '1rem', color: '#111827' }}>
+                                Recent Activity
                             </Typography>
-                        )}
-                    </Paper>
+                            <Chip label={`${stats.recentActivity?.length || 0} events`} size="small"
+                                sx={{ backgroundColor: '#EFF6FF', color: '#2563EB', fontWeight: 600, fontSize: '0.72rem' }} />
+                        </Box>
+                        <Divider sx={{ borderColor: '#F3F4F6' }} />
+                        <Box sx={{ p: 2 }}>
+                            {stats.recentActivity?.length > 0 ? (
+                                stats.recentActivity.map((activity, index) => (
+                                    <Box key={activity.id || index} sx={{
+                                        display: 'flex', alignItems: 'flex-start', gap: 2,
+                                        py: 1.5,
+                                        borderBottom: index < stats.recentActivity.length - 1 ? '1px solid #F3F4F6' : 'none',
+                                    }}>
+                                        <Box sx={{
+                                            width: 34, height: 34, borderRadius: '10px',
+                                            backgroundColor: '#EFF6FF', display: 'flex',
+                                            alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                                        }}>
+                                            <FiberManualRecordRoundedIcon sx={{ fontSize: 10, color: '#2563EB' }} />
+                                        </Box>
+                                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                                            <Typography sx={{ fontSize: '0.85rem', fontWeight: 600, color: '#111827', lineHeight: 1.3 }}>
+                                                {String(activity.description)}
+                                            </Typography>
+                                            <Typography sx={{ fontSize: '0.75rem', color: '#9CA3AF', mt: 0.25 }}>
+                                                {new Date(activity.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+                                ))
+                            ) : (
+                                <Box sx={{ py: 4, textAlign: 'center' }}>
+                                    <Typography sx={{ color: '#9CA3AF', fontSize: '0.875rem' }}>No recent activity</Typography>
+                                </Box>
+                            )}
+                        </Box>
+                    </Card>
                 </Grid>
 
                 {/* Recent Listings */}
                 <Grid item xs={12} md={6}>
-                    <Paper elevation={3} sx={{ p: 3, borderRadius: 3, height: '100%' }}>
-                        <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ borderBottom: '2px solid', borderColor: 'divider', pb: 1 }}>
-                            Recent Listings Added
-                        </Typography>
-                        {stats.recentListings.length > 0 ? (
-                            <List>
-                                {stats.recentListings.map((listing, index) => (
-                                    <React.Fragment key={listing._id}>
-                                        <ListItem sx={{ px: 0 }}>
-                                            <ListItemText
-                                                primary={listing.pgName}
-                                                secondary={`Location: ${listing.location} | Rent: ₹${listing.rent}`}
-                                                primaryTypographyProps={{ variant: 'subtitle1', fontWeight: 'bold' }}
-                                            />
-                                        </ListItem>
-                                        {index < stats.recentListings.length - 1 && <Divider component="li" />}
-                                    </React.Fragment>
-                                ))}
-                            </List>
-                        ) : (
-                            <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-                                No recent listings to display.
+                    <Card sx={{ height: '100%' }}>
+                        <Box sx={{ p: 3, pb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Typography sx={{ fontWeight: 700, fontSize: '1rem', color: '#111827' }}>
+                                Recent Listings Added
                             </Typography>
-                        )}
-                    </Paper>
+                            <Chip label={`${stats.recentListings?.length || 0} listings`} size="small"
+                                sx={{ backgroundColor: '#F0FDFA', color: '#14B8A6', fontWeight: 600, fontSize: '0.72rem' }} />
+                        </Box>
+                        <Divider sx={{ borderColor: '#F3F4F6' }} />
+                        <Box sx={{ p: 2 }}>
+                            {stats.recentListings?.length > 0 ? (
+                                stats.recentListings.map((listing, index) => (
+                                    <Box key={listing._id} sx={{
+                                        display: 'flex', alignItems: 'center', gap: 2,
+                                        py: 1.5,
+                                        borderBottom: index < stats.recentListings.length - 1 ? '1px solid #F3F4F6' : 'none',
+                                    }}>
+                                        <Avatar sx={{
+                                            width: 38, height: 38, borderRadius: '10px',
+                                            background: 'linear-gradient(135deg, #14B8A6, #2563EB)',
+                                            fontSize: '0.875rem', fontWeight: 700, flexShrink: 0,
+                                        }}>
+                                            {listing.pgName?.charAt(0) || 'P'}
+                                        </Avatar>
+                                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                                            <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: '#111827', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                {listing.pgName}
+                                            </Typography>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.25 }}>
+                                                <LocationOnRoundedIcon sx={{ fontSize: 12, color: '#9CA3AF' }} />
+                                                <Typography sx={{ fontSize: '0.75rem', color: '#6B7280' }}>{listing.location}</Typography>
+                                            </Box>
+                                        </Box>
+                                        <Box sx={{
+                                            display: 'flex', alignItems: 'center', gap: 0.25,
+                                            backgroundColor: '#F0FDFA', px: 1.5, py: 0.5, borderRadius: '8px',
+                                        }}>
+                                            <CurrencyRupeeRoundedIcon sx={{ fontSize: 13, color: '#14B8A6' }} />
+                                            <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: '#14B8A6' }}>
+                                                {listing.rent?.toLocaleString('en-IN')}
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+                                ))
+                            ) : (
+                                <Box sx={{ py: 4, textAlign: 'center' }}>
+                                    <Typography sx={{ color: '#9CA3AF', fontSize: '0.875rem' }}>No listings yet</Typography>
+                                </Box>
+                            )}
+                        </Box>
+                    </Card>
                 </Grid>
             </Grid>
         </Box>

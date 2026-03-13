@@ -3,15 +3,16 @@ const mongoose = require('mongoose');
 const PgRoomSchema = new mongoose.Schema({
     pgId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "PgListing"
+        ref: "PgListing",
+        required: true
     },
     roomType: {
         type: String,
         enum: ["Single", "Double", "Triple", "Dormitory"]
     },
-    sharingCapacity: Number,
-    totalBeds: Number,
-    roomRent: Number,
+    sharingCapacity: { type: Number, min: 0 },
+    totalBeds: { type: Number, min: 0 },
+    roomRent: { type: Number, min: 0 },
     acAvailable: Boolean
 });
 

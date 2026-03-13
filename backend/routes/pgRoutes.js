@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const PgListing = require('../models/PgListing');
+const PgRoom = require('../models/PgRoom');
 const { protect } = require('../middleware/authMiddleware');
 
 // Get all PG Listings
@@ -83,6 +84,15 @@ router.put('/:id', protect, async (req, res) => {
 // Delete PG Listing
 router.delete('/:id', protect, async (req, res) => {
     try {
+        // Check if any rooms exist for this PG
+        const roomsCount = await PgRoom.countDocuments({ pgId: req.params.id });
+        if (roomsCount > 0) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Cannot delete PG: Please delete all rooms associated with this PG first.' 
+            });
+        }
+
         const deletedListing = await PgListing.findOneAndDelete({ _id: req.params.id, ownerId: req.user._id });
         if (!deletedListing) return res.status(404).json({ message: 'Listing not found or unauthorized' });
         res.json({ message: 'Listing deleted' });

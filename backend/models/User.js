@@ -12,15 +12,21 @@ const UserSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: true
+        required: false   // Optional — Google OAuth users have no password
+    },
+    googleId: {
+        type: String,
+        default: null
     },
     role: {
         type: String,
         enum: ["student", "owner", "admin"],
-        default: "student"
+        default: "owner"  // This portal is PG-owner only
     },
     phone: String,
     profileImage: String,
+    resetPasswordToken: String,
+    resetPasswordExpire: Date,
     createdAt: {
         type: Date,
         default: Date.now

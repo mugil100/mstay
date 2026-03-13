@@ -35,7 +35,7 @@ router.get('/', protect, async (req, res) => {
 // Update or Create Availability for a Room
 router.put('/:roomId', protect, async (req, res) => {
     try {
-        const { availableBeds, status } = req.body;
+        let { availableBeds, status } = req.body;
 
         // 1. Get owner's PGs
         const ownerPgs = await PgListing.find({ ownerId: req.user._id });
@@ -48,6 +48,21 @@ router.put('/:roomId', protect, async (req, res) => {
         });
 
         if (!room) return res.status(404).json({ message: 'Room not found or unauthorized' });
+
+        // CRITICAL DATA INTEGRITY CHECK: availableBeds <= totalBeds
+        if (availableBeds > room.totalBeds) {
+            return res.status(400).json({ 
+                success: false, 
+                message: `Available beds (${availableBeds}) cannot exceed total beds in room (${room.totalBeds}).` 
+            });
+        }
+
+        // AUTO-STATUS LOGIC
+        if (availableBeds === 0) {
+            status = 'Full';
+        } else if (availableBeds > 0 && status === 'Full') {
+            status = 'Available'; // Reset from Full if beds are now available
+        }
 
         // Find existing availability or create new
         let availability = await PgAvailability.findOne({ roomId: req.params.roomId });
