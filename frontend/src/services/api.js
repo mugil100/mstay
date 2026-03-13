@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api', // Backend URL
+    baseURL: '/api', // Relative path works on both Vercel and Localhost
 });
 
 api.interceptors.request.use((config) => {
