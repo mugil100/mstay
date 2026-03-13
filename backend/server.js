@@ -43,7 +43,11 @@ mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log(`✅ MongoDB Connected to database: ${mongoose.connection.name} (Cloudinary Ready)`))
     .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
-// Start server
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
+// Start server (Only if not in Vercel environment)
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(`🚀 Server running on http://localhost:${PORT}`);
+    });
+}
+
+module.exports = app;

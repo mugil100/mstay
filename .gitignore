@@ -24,14 +24,32 @@ lerna-debug.log*
 .env.development.local
 .env.test.local
 .env.production.local
+*.env
+
+# Build and production (general)
+dist/
+build/
+.next/
+out/
+coverage/
+dist-ssr/
+*.exe
+*.dll
+*.so
+*.dylib
 
 # Editor directories and files
-.vscode/*
+.vscode/
 !.vscode/extensions.json
-.idea
+.idea/
 .DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
